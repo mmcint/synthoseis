@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "bruges>=0.5.4",
+    "fsspec",
     "matplotlib",
     "noise>=1.2.2",
     "numpy<2",
@@ -16,4 +17,6 @@ dependencies = [
     "setuptools>=76.0.0",
     "tables>=3.9.2",
     "tqdm",
+    "xarray",
+    "zarr",
 ]

@@ -486,8 +486,25 @@ class Geomodel:
 
         It generates a `.npy` file on disk.
         """
-        """Write 3D array to npy format."""
-        fname = os.path.join(
-            self.cfg.work_subfolder, f"{fname}_{self.cfg.date_stamp}.npy"
-        )
-        np.save(fname, data)
+        """Write volume to the model Zarr store via xarray."""
+        writer = getattr(self.cfg, "xr_writer", None)
+        if writer is None:
+            raise RuntimeError(
+                "Parameters.xr_writer not initialized. Expected Parameters.setup_model() to run first."
+            )
+
+        # Convert PyTables arrays (e.g. tables.CArray) to NumPy before handing to xarray.
+        if not isinstance(data, np.ndarray) and getattr(getattr(data, "__class__", None), "__module__", "").startswith(
+            "tables"
+        ):
+            data = data[:]
+
+        # Heuristic dims based on rank; most cubes are (iline, xline, z).
+        if data.ndim == 3:
+            dims = ("iline", "xline", "z")
+        elif data.ndim == 4:
+            dims = ("angle", "iline", "xline", "z")
+        else:
+            raise ValueError(f"Unsupported volume ndim={data.ndim} for {fname}")
+
+        writer.write_var(fname, data, dims=dims)

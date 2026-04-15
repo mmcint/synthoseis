@@ -1,0 +1,87 @@
+Metadata-Version: 2.1
+Name: bruges
+Version: 0.5.4
+Summary: A library of geophysical equations.
+Home-page: https://github.com/agilescientific/bruges
+Author: The Bruges Authors
+Author-email: hello@agilescientific.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Intended Audience :: Science/Research
+Classifier: Development Status :: 4 - Beta
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+License-File: AUTHORS.md
+Requires-Dist: numpy
+Requires-Dist: scipy
+Provides-Extra: dev
+Requires-Dist: build ; extra == 'dev'
+Requires-Dist: pytest ; extra == 'dev'
+Requires-Dist: pytest-cov ; extra == 'dev'
+Requires-Dist: pytest-mpl ; extra == 'dev'
+Requires-Dist: sphinx ; extra == 'dev'
+Requires-Dist: sphinxcontrib-apidoc ; extra == 'dev'
+Requires-Dist: myst-nb ; extra == 'dev'
+Requires-Dist: furo ; extra == 'dev'
+Requires-Dist: matplotlib ; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: sphinx ; extra == 'docs'
+Requires-Dist: sphinxcontrib-apidoc ; extra == 'docs'
+Requires-Dist: myst-nb ; extra == 'docs'
+Requires-Dist: furo ; extra == 'docs'
+Requires-Dist: matplotlib ; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: pytest ; extra == 'test'
+Requires-Dist: pytest-cov ; extra == 'test'
+Requires-Dist: pytest-mpl ; extra == 'test'
+
+# bruges is a
+
+![Bruges](http://agile.geosci.ai/bruges.png)
+
+In other words, it's just a load of functions that implement important equations in (mostly seismic) geophysics, from Aki-Richards to Zoeppritz.
+
+[![Run tests](https://github.com/agilescientific/bruges/actions/workflows/run-tests.yml/badge.svg)](https://github.com/agilescientific/bruges/actions/workflows/run-tests.yml)
+[![Build docs](https://github.com/agilescientific/bruges/actions/workflows/build-docs.yml/badge.svg)](https://github.com/agilescientific/bruges/actions/workflows/build-docs.yml)
+[![PyPI version](https://img.shields.io/pypi/v/bruges.svg)](https://pypi.python.org/pypi/bruges/)
+[![PyPI versions](https://img.shields.io/pypi/pyversions/bruges.svg)](https://pypi.org/project/bruges//)
+[![PyPI license](https://img.shields.io/pypi/l/bruges.svg)](https://pypi.org/project/bruges/)
+
+
+## Quick start
+
+Install with:
+
+```shell
+pip install bruges
+```
+
+Make a trapezoidal wavelet like:
+
+```python
+import bruges as bg
+w, t = bg.filters.ormsby(duration=0.256, dt=0.002, f=[5, 10, 40, 80])
+```
+
+This produces two arrays: amplitude `w` and time `t`.
+
+
+## Links
+
+- [Documentation](https://code.agilescientific.com/bruges)
+- [Issue Tracker](https://github.com/agilescientific/bruges/issues/)
+- [PyPi](http://pypi.python.org/pypi/bruges/)
+- [Agile's website](http://www.agilescientific.com)
+
+![Bruges rooves](https://www.dropbox.com/s/tzvi22ujq6rozdb/bruges_long_rooves.png?raw=1)
+
+

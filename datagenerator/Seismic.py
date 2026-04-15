@@ -287,16 +287,35 @@ class SeismicVolume(Geomodel):
         scaled_data[1 + cube_incr, ...] *= factor_mid
         scaled_data[2 + cube_incr, ...] *= factor_far
 
-        for i, ang in enumerate(self.cfg.incident_angles):
-            data = scaled_data[i, ...]
-            fname = f"{name}_{ang}_degrees"
-            self.write_cube_to_disk(data, fname)
-        normed_data = normalize_seismic(scaled_data)
-        for i, ang in enumerate(self.cfg.incident_angles):
-            data = normed_data[i, ...]
-            fname = f"{name}_{ang}_degrees_normalized"
-            self.write_cube_to_disk(data, fname)
-        return normed_data
+        # Consolidate all incident-angle substacks into one 4D variable.
+        if scaled_data.ndim == 4:
+            nang = len(self.cfg.incident_angles)
+            angle_coord = np.asarray(self.cfg.incident_angles, dtype="float32")
+            scaled_stack = scaled_data[cube_incr : cube_incr + nang, ...]
+            self.cfg.xr_writer.write_var(
+                f"{name}angle_stack",
+                scaled_stack,
+                dims=("angle", "iline", "xline", "z"),
+                coords={"angle": angle_coord},
+                attrs={"angles_degrees": angle_coord.tolist(), "scaled": True},
+            )
+
+            normed_data = normalize_seismic(scaled_data)
+            normed_stack = normed_data[cube_incr : cube_incr + nang, ...]
+            self.cfg.xr_writer.write_var(
+                f"{name}angle_stack_normalized",
+                normed_stack,
+                dims=("angle", "iline", "xline", "z"),
+                coords={"angle": angle_coord},
+                attrs={"angles_degrees": angle_coord.tolist(), "scaled": True},
+            )
+            return normed_stack
+
+        # Fallback: 3D volumes
+        self.write_cube_to_disk(scaled_data, f"{name}scaled")
+        normed_3d = normalize_seismic(scaled_data)
+        self.write_cube_to_disk(normed_3d, f"{name}normalized")
+        return normed_3d
 
     @staticmethod
     def random_z_rho_vp_vs(dmin=-7, dmax=7):

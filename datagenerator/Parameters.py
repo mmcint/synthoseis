@@ -11,6 +11,8 @@ import numpy as np
 import tables
 import subprocess
 
+from datagenerator.xr_io import XRWriter
+
 dir_name = os.path.dirname(__file__)
 CONFIG_PATH = os.path.abspath(os.path.join(dir_name, "../config/config_ht.json"))
 
@@ -144,6 +146,9 @@ class Parameters(_Borg):
         self._set_model_parameters(self.model_dir_name)
         self.make_directories()
         self.write_key_file()
+        # Single-output store for all volumes (replaces scattered .npy files)
+        self.zarr_store_path = os.path.join(self.work_subfolder, "model.zarr")
+        self.xr_writer = XRWriter(self, self.zarr_store_path)
         self._setup_rpm_scaling_factors(rpm_factors)
 
         # Write model parameters to logfile

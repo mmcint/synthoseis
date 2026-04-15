@@ -377,12 +377,26 @@ class SaltModel:
         salt_segments = self.cfg.h5file.root.ModelData.salt_segments[:]
 
         if self.cfg.model_qc_volumes:
-            np.save(f"{self.cfg.work_subfolder}/depth_maps_presalt.npy", depth_maps)
-            np.save(
-                f"{self.cfg.work_subfolder}/depth_maps_gaps_presalt.npy",
-                depth_maps_gaps,
+            writer = getattr(self.cfg, "xr_writer", None)
+            if writer is None:
+                raise RuntimeError(
+                    "Parameters.xr_writer not initialized. Expected Parameters.setup_model() to run first."
+                )
+            writer.write_var(
+                "depth_maps_presalt",
+                depth_maps,
+                dims=("iline", "xline", "horizon_depth_maps_presalt"),
             )
-            np.save(f"{self.cfg.work_subfolder}/salt_segments.npy", salt_segments)
+            writer.write_var(
+                "depth_maps_gaps_presalt",
+                depth_maps_gaps,
+                dims=("iline", "xline", "horizon_depth_maps_gaps_presalt"),
+            )
+            writer.write_var(
+                "salt_segments",
+                salt_segments,
+                dims=("iline", "xline", "z"),
+            )
 
         depth_maps_salt = np.zeros_like(depth_maps_gaps)
         depth_maps_gaps_salt = np.zeros_like(depth_maps_gaps)
@@ -454,9 +468,15 @@ class SaltModel:
                 pass
 
         if self.cfg.model_qc_volumes:
-            np.save(
-                f"{self.cfg.work_subfolder}/depth_maps_salt_prepushdown.npy",
+            writer = getattr(self.cfg, "xr_writer", None)
+            if writer is None:
+                raise RuntimeError(
+                    "Parameters.xr_writer not initialized. Expected Parameters.setup_model() to run first."
+                )
+            writer.write_var(
+                "depth_maps_salt_prepushdown",
                 depth_maps_salt,
+                dims=("iline", "xline", "horizon_depth_maps_salt_prepushdown"),
             )
 
         depth_maps_salt = push_down_remove_negative_thickness(depth_maps_salt)
@@ -479,12 +499,30 @@ class SaltModel:
         # self.cfg.h5file.root.ModelData.faulted_depth_maps_gaps[:] = depth_maps_gaps_salt
 
         if self.cfg.model_qc_volumes:
-            np.save(f"{self.cfg.work_subfolder}/depth_maps_salt.npy", depth_maps_salt)
-            np.save(
-                f"{self.cfg.work_subfolder}/depth_maps_gaps_salt.npy",
-                depth_maps_gaps_salt,
+            writer = getattr(self.cfg, "xr_writer", None)
+            if writer is None:
+                raise RuntimeError(
+                    "Parameters.xr_writer not initialized. Expected Parameters.setup_model() to run first."
+                )
+            writer.write_var(
+                "depth_maps_salt",
+                depth_maps_salt,
+                dims=("iline", "xline", "horizon_depth_maps_salt"),
             )
-            np.save(f"{self.cfg.work_subfolder}/facies_label.npy", _label)
+            writer.write_var(
+                "depth_maps_gaps_salt",
+                depth_maps_gaps_salt,
+                dims=("iline", "xline", "horizon_depth_maps_gaps_salt"),
+            )
+            # `_label` here is a 2D (track, bin) slice from the last horizon iteration.
+            if getattr(_label, "ndim", None) == 2:
+                writer.write_var("facies_label", _label, dims=("iline", "xline"))
+            else:
+                writer.write_var(
+                    "facies_label",
+                    _label,
+                    dims=("iline", "xline", "z"),
+                )
 
         return depth_maps_salt, depth_maps_gaps_salt
 

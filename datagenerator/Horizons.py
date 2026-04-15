@@ -266,9 +266,19 @@ class Horizons:
         return converted_maps
 
     def write_maps_to_disk(self, horizons, name):
-        """Write horizons to disk."""
-        fname = os.path.join(self.cfg.work_subfolder, name)
-        np.save(fname, horizons)
+        """Write horizon maps into the model Zarr store."""
+        writer = getattr(self.cfg, "xr_writer", None)
+        if writer is None:
+            raise RuntimeError(
+                "Parameters.xr_writer not initialized. Expected Parameters.setup_model() to run first."
+            )
+        # Horizon stacks can have different lengths depending on the product (e.g. onlaps/fans).
+        # Use a variable-specific horizon dimension so the Dataset can be opened without conflicts.
+        dim = "horizon"
+        if name != "depth_maps":
+            safe = "".join(ch if (ch.isalnum() or ch == "_") else "_" for ch in name).strip("_")
+            dim = f"horizon_{safe}" if safe else "horizon_maps"
+        writer.write_var(name, horizons, dims=("iline", "xline", dim))
 
     def write_onlap_episodes(
         self, onlap_horizon_list, depth_maps_gaps, depth_maps_infilled, n=35
